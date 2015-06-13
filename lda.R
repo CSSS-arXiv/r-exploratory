@@ -2,8 +2,10 @@ require(readr)
 require(dplyr)
 require(mallet)
 
+# sample_documents_file is a dump of the main sample documents dataframe. I don't want to 
+# recreate it everytime. If the contents of the paper_sample directory changes, remove
+# the "sample_documents.RData" file in the current working director to regenerate.
 sample_documents_file = "sample_documents.RData"
-
 if(file.access(sample_documents_file)){
   
   print("No documents file - generating from scratch. Sit tight")
@@ -18,7 +20,7 @@ if(file.access(sample_documents_file)){
   
   file_list_df = data.frame(name=as.vector(file_list), size=unlist(sizes), stringsAsFactors = FALSE)
   
-  big_files = file_list_df %>% filter(size>3000)
+  big_files = file_list_df %>% filter(size>2000)
   
   sample_documents_list = lapply(big_files$name, FUN = function(fn){
     tryCatch({
@@ -29,7 +31,7 @@ if(file.access(sample_documents_file)){
     )
   })
   
-  big_files$content = unlist(sample_documents)
+  big_files$content = unlist(sample_documents_list)
   
   sample_documents_df = big_files
   
