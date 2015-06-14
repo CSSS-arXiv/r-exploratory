@@ -40,7 +40,7 @@ if(file.access(sample_documents_file)){
   load(sample_documents_file)
 }
 
-train_documents_df = sample_documents_df %>% sample_n(200)
+train_documents_df = sample_documents_df %>% sample_n(100)
 
 mallet.instances <- mallet.import(train_documents_df$name, 
                                   train_documents_df$content, 
@@ -107,7 +107,7 @@ print(distance, digits=3)
 filename = paste("./plots/dendrogram", nrow(train_documents_df), "png", sep=".")
 titleText = paste0(nrow(train_documents_df), " Document Topic Dendrogram")
 
-png(file=filename, bg="white", height=1050, width=1050)
+png(file=filename, bg="white", height=1050, width=1250)
 plot(hclust(distance), 
      labels=topics.labels, font=2, lwd=3, cex=2, main="")
 title(main=titleText, cex.main = 4)
