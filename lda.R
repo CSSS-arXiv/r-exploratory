@@ -40,14 +40,14 @@ if(file.access(sample_documents_file)){
   load(sample_documents_file)
 }
 
-train_documents_df = sample_documents_df %>% sample_n(100)
+train_documents_df = sample_documents_df %>% sample_n(1000)
 
 mallet.instances <- mallet.import(train_documents_df$name, 
                                   train_documents_df$content, 
                                   stoplist.file="./resources/stopwords.txt",
                                   token.regexp = "[a-zA-Z]+")
 
-#create topic trainer object. 10 Topics
+#create topic trainer object. 50 Topics
 n.topics <- 50
 topic.model <- MalletLDA(n.topics)
 
@@ -91,9 +91,9 @@ for (topic in 1:n.topics) {
 # have a look at keywords for each topic
 topics.labels
 
-# create data.frame with columns as reviews and rows as topics
+# create data.frame with columns as documents and rows as topics
 topic_docs <- data.frame(topic.docs)
-names(topic_docs) <- rownames(reviews)
+names(topic_docs) <- rownames(train_documents_df)
 
 docs_topics = t(topic_docs)
 best_fits = tail(sort(docs_topics[,3]))
