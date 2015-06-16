@@ -1,6 +1,9 @@
+options( java.parameters = "-Xmx4g" )
+
 require(readr)
 require(dplyr)
 require(mallet)
+require(microbenchmark)
 
 # sample_documents_file is a dump of the main sample documents dataframe. I don't want to 
 # recreate it everytime. If the contents of the paper_sample directory changes, remove
@@ -40,38 +43,48 @@ if(file.access(sample_documents_file)){
   load(sample_documents_file)
 }
 
+modelTopics <- function (train_documents_df, numTopics=50) {
+  
+  mallet.instances <- mallet.import(train_documents_df$name, 
+                                    train_documents_df$content, 
+                                    stoplist.file="./resources/stopwords.txt",
+                                    token.regexp = "[a-zA-Z]{3,}")
+  
+  #create topic trainer object. 
+  n.topics <- numTopics
+  topic.model <- MalletLDA(n.topics)
+  
+  #load documents
+  topic.model$loadDocuments(mallet.instances)
+  
+  ## Get the vocabulary, and some statistics about word frequencies.
+  ## These may be useful in further curating the stopword list.
+  vocabulary <- topic.model$getVocabulary()
+  word.freqs <- mallet.word.freqs(topic.model)
+  
+  ## Optimize hyperparameters every 20 iterations,
+  ## after 50 burn-in iterations.
+  topic.model$setAlphaOptimization(20, 50)
+  
+  ## Now train a model. Note that hyperparameter optimization is on, by default.
+  ## We can specify the number of iterations. Here we'll use a large-ish round number.
+  topic.model$train(200)
+  
+  ## NEW: run through a few iterations where we pick the best topic for each token,
+  ## rather than sampling from the posterior distribution.
+  topic.model$maximize(10)
+  
+  topic.model
+}
+
 train_documents_df = sample_documents_df %>% sample_n(1000)
 
-mallet.instances <- mallet.import(train_documents_df$name, 
-                                  train_documents_df$content, 
-                                  stoplist.file="./resources/stopwords.txt",
-                                  token.regexp = "[a-zA-Z]+")
+n.topics = 50
 
-#create topic trainer object. 50 Topics
-n.topics <- 50
-topic.model <- MalletLDA(n.topics)
+topic.model = modelTopics(train_documents_df, n.topics)
 
-#load documents
-topic.model$loadDocuments(mallet.instances)
 
-## Get the vocabulary, and some statistics about word frequencies.
-## These may be useful in further curating the stopword list.
-vocabulary <- topic.model$getVocabulary()
-word.freqs <- mallet.word.freqs(topic.model)
-
-## Optimize hyperparameters every 20 iterations,
-## after 50 burn-in iterations.
-topic.model$setAlphaOptimization(20, 50)
-
-## Now train a model. Note that hyperparameter optimization is on, by default.
-## We can specify the number of iterations. Here we'll use a large-ish round number.
-topic.model$train(200)
-
-## NEW: run through a few iterations where we pick the best topic for each token,
-## rather than sampling from the posterior distribution.
-topic.model$maximize(10)
-
-## Get the probability of topics in reviews and the probability of words in topics.
+## Get the probability of topics in documents and the probability of words in topics.
 ## By default, these functions return raw word counts. Here we want probabilities,
 ## so we normalize, and add "smoothing" so that nothing has exactly 0 probability.
 doc.topics <- mallet.doc.topics(topic.model, smoothed=T, normalized=T)
@@ -81,7 +94,7 @@ topic.words <- mallet.topic.words(topic.model, smoothed=T, normalized=T)
 ## transpose and normalize the doc topics
 topic.docs <- t(doc.topics)
 topic.docs <- topic.docs / rowSums(topic.docs)
-write.csv(topic.docs, "dcb-topic-docs.csv")
+#write.csv(topic.docs, "dcb-topic-docs.csv")
 
 ## Get a vector containing short names for the topics
 topics.labels <- rep("", n.topics)
@@ -93,7 +106,8 @@ topics.labels
 
 # create data.frame with columns as documents and rows as topics
 topic_docs <- data.frame(topic.docs)
-names(topic_docs) <- rownames(train_documents_df)
+names(topic_docs) <- train_documents_df$name
+rownames(topic_docs) <- topics.labels
 
 docs_topics = t(topic_docs)
 best_fits = tail(sort(docs_topics[,3]))
@@ -113,3 +127,12 @@ plot(hclust(distance),
 title(main=titleText, cex.main = 4)
 dev.off()
 
+
+bench <- microbenchmark(
+  modelTopics(sample_documents_df %>% sample_n(100), 50),
+  modelTopics(sample_documents_df %>% sample_n(200), 50),
+  modelTopics(sample_documents_df %>% sample_n(400), 50),
+  modelTopics(sample_documents_df %>% sample_n(800), 50),
+  modelTopics(sample_documents_df %>% sample_n(1000), 50),
+  times=3
+)
