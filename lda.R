@@ -8,7 +8,7 @@ toInstall <- requiredPackages[!(requiredPackages %in% installed.packages()[,"Pac
 
 if(length(toInstall)) install.packages(toInstall)
 
-# load them up ("pkgs" is a throwaway variable; it only collects the output of sapply)
+# load them up and suppress messages
 invisible(sapply(requiredPackages, library, character.only=T))
 
 # sample_documents_file is a dump of the main sample documents dataframe. I don't want to 
