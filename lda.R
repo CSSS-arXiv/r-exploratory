@@ -14,7 +14,7 @@ if(file.access(sample_documents_file)){
   print("No documents file - generating from scratch. Sit tight")
   
   file_list <- c(
-    list.files(path="./paper_sample/", 
+    list.files(path="./scrub", 
                pattern="*txt.gz$", 
                full.names=TRUE)
   )
@@ -57,10 +57,7 @@ modelTopics <- function (train_documents_df, numTopics=50) {
   #load documents
   topic.model$loadDocuments(mallet.instances)
   
-  ## Get the vocabulary, and some statistics about word frequencies.
-  ## These may be useful in further curating the stopword list.
-  vocabulary <- topic.model$getVocabulary()
-  word.freqs <- mallet.word.freqs(topic.model)
+
   
   ## Optimize hyperparameters every 20 iterations,
   ## after 50 burn-in iterations.
@@ -90,6 +87,11 @@ topic.model = modelTopics(train_documents_df, n.topics)
 doc.topics <- mallet.doc.topics(topic.model, smoothed=T, normalized=T)
 topic.words <- mallet.topic.words(topic.model, smoothed=T, normalized=T)
 
+## Get the vocabulary, and some statistics about word frequencies.
+## These may be useful in further curating the stopword list.
+vocabulary <- topic.model$getVocabulary()
+word.freqs <- mallet.word.freqs(topic.model)
+
 # from http://www.cs.princeton.edu/~mimno/R/clustertrees.R
 ## transpose and normalize the doc topics
 topic.docs <- t(doc.topics)
@@ -118,7 +120,7 @@ distance = dist(topic.words, diag=T)
 print(distance, digits=3)
 
 ## cluster based on shared words
-filename = paste("./plots/dendrogram", nrow(train_documents_df), "png", sep=".")
+filename = paste("./plots/dendrogram", nrow(train_documents_df), "scrubbed", "png", sep=".")
 titleText = paste0(nrow(train_documents_df), " Document Topic Dendrogram")
 
 png(file=filename, bg="white", height=1050, width=1250)
