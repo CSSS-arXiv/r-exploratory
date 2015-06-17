@@ -117,7 +117,9 @@ topic_docs <- data.frame(topic.docs)
 names(topic_docs) <- train_documents_df$name
 rownames(topic_docs) <- topics.labels
 
+# docs_topics is what is useful for network analysis
 docs_topics = t(topic_docs)
+
 best_fits = tail(sort(docs_topics[,3]))
 best_fit = names(best_fits)[length(best_fits)]
 train_documents_df[best_fit,"contents"]
