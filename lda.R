@@ -8,7 +8,7 @@ toInstall <- requiredPackages[!(requiredPackages %in% installed.packages()[,"Pac
 
 if(length(toInstall)) install.packages(toInstall)
 
-# load them up
+# load them up ("pkgs" is a throwaway variable; it only collects the output of sapply)
 pkgs = sapply(requiredPackages, library, character.only=T)
 
 # sample_documents_file is a dump of the main sample documents dataframe. I don't want to 
@@ -143,6 +143,6 @@ bench <- microbenchmark(
   modelTopics(sample_documents_df %>% sample_n(200), 50),
   modelTopics(sample_documents_df %>% sample_n(400), 50),
   modelTopics(sample_documents_df %>% sample_n(800), 50),
-  modelTopics(sample_documents_df %>% sample_n(1000), 50),
+  modelTopics(sample_documents_df %>% sample_n(1600), 50),
   times=3
 )
