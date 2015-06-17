@@ -74,7 +74,7 @@ modelTopics <- function (train_documents_df, numTopics=50) {
   topic.model
 }
 
-train_documents_df = sample_documents_df %>% sample_n(1000)
+train_documents_df = sample_documents_df %>% sample_n(1800)
 
 n.topics = 50
 
