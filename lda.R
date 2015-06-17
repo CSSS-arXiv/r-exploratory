@@ -1,9 +1,15 @@
 options( java.parameters = "-Xmx4g" )
 
-require(readr)
-require(dplyr)
-require(mallet)
-require(microbenchmark)
+# install your packages
+requiredPackages = c("readr","dplyr",
+                     "mallet","microbenchmark")
+
+toInstall <- requiredPackages[!(requiredPackages %in% installed.packages()[,"Package"])]
+
+if(length(toInstall)) install.packages(toInstall)
+
+# load them up
+pkgs = sapply(requiredPackages, library, character.only=T)
 
 # sample_documents_file is a dump of the main sample documents dataframe. I don't want to 
 # recreate it everytime. If the contents of the paper_sample directory changes, remove
