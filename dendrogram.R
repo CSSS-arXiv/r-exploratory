@@ -98,5 +98,5 @@ JSDivergence(even_weight, t(doc_topic_mat))
 jsd_distance= dist.JSD(doc_topic_mat)
 
 hc = hclust(jsd_distance)
-ggdendrogram(hc, rotate=TRUE) + ggtitle("Hierachical Cluster 2\narXiv Condensed Matter Topics Extracted via LDA")
-
+ggdendrogram(hc, rotate=TRUE) + 
+  ggtitle("Hierachical Cluster 2\narXiv Condensed Matter Topics Extracted via LDA") 
