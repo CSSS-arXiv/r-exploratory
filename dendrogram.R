@@ -5,6 +5,8 @@
 library(readr)
 library(dplyr)
 library(stringr)
+library(ggdendro)
+library(ggplot2)
 
 #' Calculate the Entropy of a vector of probabilities
 #'
@@ -72,9 +74,9 @@ dist.JSD <- function(inMatrix, pseudocount=0.000001, ...) {
   return(resultsMatrix) 
 }
 
-topic_keys = read_delim("./lda/topic_keys.txt", delim = "\t", col_names = c("id", "dirichlet", "topic"))
+topic_keys = read_delim("./lda/topic_keys-2.txt", delim = "\t", col_names = c("id", "dirichlet", "topic"))
 
-doc_topics = read_delim("./lda/doc_topics.txt", delim = "\t", col_names = c("id", "document",
+doc_topics = read_delim("./lda/doc_topics-2.txt", delim = "\t", col_names = c("id", "document",
                                                                             topic_keys$id))
 
 doc_topic_mat = as.matrix(doc_topics %>% select(-document, -id), nrow=nrow(doc_topics))
@@ -85,6 +87,9 @@ colnames(doc_topic_mat) = apply(top_words, 1, paste, collapse=" ")
 
 rownames(doc_topic_mat) = doc_topics$document
 
+#normalize
+doc_topic_mat = doc_topic_mat / rowSums(doc_topic_mat)
+
 even_weight = rep(1/nrow(doc_topic_mat), nrow(doc_topic_mat))
 
 # doc_topic_mat has the doc-probs in the rows. SO transform (t(...)) it
@@ -92,4 +97,6 @@ JSDivergence(even_weight, t(doc_topic_mat))
 
 jsd_distance= dist.JSD(doc_topic_mat)
 
-plot(hclust(jsd_distance))
+hc = hclust(jsd_distance)
+ggdendrogram(hc, rotate=TRUE) + ggtitle("Hierachical Cluster 2\narXiv Condensed Matter Topics Extracted via LDA")
+
