@@ -8,3 +8,12 @@ Make a directory called "./paper_sample" and put the untarred paper_sample.tar.g
 
 # lda.R
 Quick exploration of the sample data.
+
+# dendrogram.R
+Assumes the existence of two file:
+* lda/doc_topics.txt
+* lda/topic_keys.txt
+
+The first contains each document's distribution over topics. The 2nd is a listing of the top20 words associated with each topic, presumably in descending order.
+
+The R script will perform Jensen Shannon Distance calculations over the topic distrbutions and plot them.
