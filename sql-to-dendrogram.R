@@ -82,7 +82,7 @@ makeDendro = function(i, keyDbDF) {
   ggdendrogram(hc, rotate=TRUE) + 
     ggtitle(title)
   
-  ggsave(plotFileName, width=12, height=8, dpi=100)
+  ggsave(plotFileName, width=13, height=5.5, dpi=100)
   
 }
 
@@ -97,5 +97,7 @@ ldaOutputs = data.frame(topic = c("./sqlite/topic_keys_1.txt",
                                 "./sqlite/doc_topics_4.db",
                                 "./sqlite/doc_topics_5.db"),
                         stringsAsFactors = FALSE)
+
+makeDendro(1, ldaOutputs)
 
 lapply(1:nrow(ldaOutputs), makeDendro, ldaOutputs)
